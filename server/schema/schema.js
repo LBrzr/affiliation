@@ -1,6 +1,11 @@
 const { users, affiliationLinks, affiliationVotes } = require('./sample_data');
 
-const { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLSchema, GraphQLList, GraphQLNonNull, GraphQLID } = require('graphql');
+const { GraphQLObjectType, GraphQLString, GraphQLSchema, GraphQLList, GraphQLID } = require('graphql');
+
+// models
+const User = require('../models/user');
+const AffiliationLink = require('../models/affiliation_link');
+const AffiliationVote = require('../models/affiliation_vote');
 
 // User Type
 const UserType = new GraphQLObjectType({
