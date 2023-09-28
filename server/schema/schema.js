@@ -1,6 +1,4 @@
-const { users, affiliationLinks, affiliationVotes } = require('./sample_data');
-
-const { GraphQLObjectType, GraphQLString, GraphQLSchema, GraphQLList, GraphQLID } = require('graphql');
+const { GraphQLObjectType, GraphQLString, GraphQLSchema, GraphQLList, GraphQLID, GraphQLNonNull } = require('graphql');
 
 // models
 const User = require('../models/user');
@@ -30,7 +28,7 @@ const AffiliationLinkType = new GraphQLObjectType({
         url: { type: GraphQLString },
         postedBy: {
             type: UserType, resolve(parent, args) {
-                return users.find(user => user.id === parent.postedBy);
+                return User.findById(parent.postedBy);
             }
         },
     })
@@ -44,12 +42,12 @@ const AffiliationVoteType = new GraphQLObjectType({
         id: { type: GraphQLID },
         user: {
             type: UserType, resolve(parent, args) {
-                return users.find(user => user.id === parent.user);
+                return User.findById(parent.user);
             },
         },
         affiliationLink: {
             type: AffiliationLinkType, resolve(parent, args) {
-                return affiliationLinks.find(affiliationLink => affiliationLink.id === parent.affiliationLink);
+                return AffiliationLink.findById(parent.affiliationLink);
             },
         },
     })
@@ -67,7 +65,7 @@ const RootQuery = new GraphQLObjectType({
                 id: { type: GraphQLID },
             },
             resolve(parent, args) {
-                return users.find(user => user.id === args.id);
+                return User.findById(args.id);
             }
         },
 
@@ -78,7 +76,7 @@ const RootQuery = new GraphQLObjectType({
                 id: { type: GraphQLID },
             },
             resolve(parent, args) {
-                return affiliationLinks.find(affiliationLink => affiliationLink.id === args.id);
+                return AffiliationLink.findById(args.id);
             }
         },
 
@@ -89,7 +87,7 @@ const RootQuery = new GraphQLObjectType({
                 id: { type: GraphQLID },
             },
             resolve(parent, args) {
-                return affiliationVotes.find(affiliationVote => affiliationVote.id === args.id);
+                return AffiliationVote.findById(args.id);
             }
         },
 
@@ -100,7 +98,7 @@ const RootQuery = new GraphQLObjectType({
                 userId: { type: GraphQLID },
             },
             resolve(parent, args) {
-                return affiliationLinks.filter(affiliationLink => affiliationLink.postedBy === args.userId);
+                return AffiliationLink.find({ postedBy: args.userId });
             }
         },
 
@@ -111,7 +109,67 @@ const RootQuery = new GraphQLObjectType({
                 affiliationLinkId: { type: GraphQLID },
             },
             resolve(parent, args) {
-                return affiliationVotes.filter(affiliationVote => affiliationVote.affiliationLink === args.affiliationLinkId);
+                return AffiliationVote.find({ affiliationLink: args.affiliationLinkId });
+            }
+        },
+    }
+});
+
+// mutation
+const Mutation = new GraphQLObjectType({
+    name: 'Mutation',
+    fields: {
+        // add user
+        addUser: {
+            type: UserType,
+            args: {
+                name: { type: GraphQLNonNull(GraphQLString) },
+                email: { type: GraphQLNonNull(GraphQLString) },
+                password: { type: GraphQLNonNull(GraphQLString) },
+            },
+            resolve(parent, args) {
+                const user = new User({
+                    name: args.name,
+                    email: args.email,
+                    password: args.password,
+                });
+                return user.save();
+            }
+        },
+
+        // add affiliation link
+        addAffiliationLink: {
+            type: AffiliationLinkType,
+            args: {
+                name: { type: GraphQLString },
+                description: { type: GraphQLString },
+                url: { type: GraphQLNonNull(GraphQLString) },
+                postedBy: { type: GraphQLNonNull(GraphQLID) },
+            },
+            resolve(parent, args) {
+                const affiliationLink = new AffiliationLink({
+                    name: args.name,
+                    description: args.description,
+                    url: args.url,
+                    postedBy: args.postedBy,
+                });
+                return affiliationLink.save();
+            }
+        },
+
+        // add affiliation vote
+        addAffiliationVote: {
+            type: AffiliationVoteType,
+            args: {
+                affiliationLink: { type: GraphQLNonNull(GraphQLID) },
+                user: { type: GraphQLNonNull(GraphQLID) },
+            },
+            resolve(parent, args) {
+                const affiliationVote = new AffiliationVote({
+                    affiliationLink: args.affiliationLink,
+                    user: args.user,
+                });
+                return affiliationVote.save();
             }
         },
     }
@@ -119,4 +177,5 @@ const RootQuery = new GraphQLObjectType({
 
 module.exports = new GraphQLSchema({
     query: RootQuery,
+    mutation: Mutation,
 });
