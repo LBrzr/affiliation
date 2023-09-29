@@ -4,6 +4,7 @@ const { GraphQLObjectType, GraphQLString, GraphQLSchema, GraphQLList, GraphQLID,
 const User = require('../models/user');
 const AffiliationLink = require('../models/affiliation_link');
 const AffiliationVote = require('../models/affiliation_vote');
+const { hashPassword, generateSalt } = require('../helpers');
 
 // User Type
 const UserType = new GraphQLObjectType({
@@ -13,7 +14,6 @@ const UserType = new GraphQLObjectType({
         id: { type: GraphQLID },
         name: { type: GraphQLString },
         email: { type: GraphQLString },
-        password: { type: GraphQLString },
     })
 });
 
@@ -119,8 +119,8 @@ const RootQuery = new GraphQLObjectType({
 const Mutation = new GraphQLObjectType({
     name: 'Mutation',
     fields: {
-        // add user
-        addUser: {
+        // register user
+        registerUser: {
             type: UserType,
             args: {
                 name: { type: GraphQLNonNull(GraphQLString) },
@@ -128,13 +128,37 @@ const Mutation = new GraphQLObjectType({
                 password: { type: GraphQLNonNull(GraphQLString) },
             },
             resolve(parent, args) {
+                const salt = generateSalt();
                 const user = new User({
                     name: args.name,
                     email: args.email,
-                    password: args.password,
+                    authentication: {
+                        password: hashPassword(salt, args.password),
+                        salt: salt,
+                    },
                 });
                 return user.save();
             }
+        },
+
+        // login user
+        loginUser: {
+            type: UserType,
+            args: {
+                email: { type: GraphQLNonNull(GraphQLString) },
+                password: { type: GraphQLNonNull(GraphQLString) },
+            },
+            resolve(parent, args) {
+                const user = User.findOne({ email: args.email });
+                if (!user) {
+                    throw new Error('User does not exist!');
+                }
+                const hashedPassword = hashPassword(user.authentication.salt, args.password);
+                if (user.authentication.password !== hashedPassword) {
+                    throw new Error('Password is incorrect!');
+                }
+                return user;
+            },
         },
 
         // add affiliation link
