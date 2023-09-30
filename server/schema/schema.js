@@ -3,7 +3,6 @@ const { GraphQLObjectType, GraphQLString, GraphQLSchema, GraphQLList, GraphQLID,
 // models
 const User = require('../models/user');
 const AffiliationLink = require('../models/affiliation_link');
-const AffiliationVote = require('../models/affiliation_vote');
 const { hashPassword, generateSalt } = require('../helpers');
 
 // User Type
@@ -14,6 +13,7 @@ const UserType = new GraphQLObjectType({
         id: { type: GraphQLID },
         name: { type: GraphQLString },
         email: { type: GraphQLString },
+        balance: { type: GraphQLString },
     })
 });
 
@@ -25,34 +25,18 @@ const AffiliationLinkType = new GraphQLObjectType({
         id: { type: GraphQLID },
         name: { type: GraphQLString },
         description: { type: GraphQLString },
-        url: { type: GraphQLString },
-        postedBy: {
+        url: {
+            type: GraphQLString, resolve(parent, args) {
+                return `${process.env.AFFILIATION_LINK_BASE_URL}${parent.id}`
+            }
+        },
+        user: {
             type: UserType, resolve(parent, args) {
-                return User.findById(parent.postedBy);
+                return User.findById(parent.user);
             }
         },
     })
 });
-
-// AffiliationVote Type
-const AffiliationVoteType = new GraphQLObjectType({
-    name: 'AffiliationVote',
-    description: 'Documentation for affiliation vote...',
-    fields: () => ({
-        id: { type: GraphQLID },
-        user: {
-            type: UserType, resolve(parent, args) {
-                return User.findById(parent.user);
-            },
-        },
-        affiliationLink: {
-            type: AffiliationLinkType, resolve(parent, args) {
-                return AffiliationLink.findById(parent.affiliationLink);
-            },
-        },
-    })
-});
-
 
 const RootQuery = new GraphQLObjectType({
     name: 'RootQueryType',
@@ -80,17 +64,6 @@ const RootQuery = new GraphQLObjectType({
             }
         },
 
-        // affiliation vote by id
-        affiliationVote: {
-            type: AffiliationVoteType,
-            args: {
-                id: { type: GraphQLID },
-            },
-            resolve(parent, args) {
-                return AffiliationVote.findById(args.id);
-            }
-        },
-
         // user's affiliation links
         userAffiliationLinks: {
             type: new GraphQLList(AffiliationLinkType),
@@ -98,18 +71,7 @@ const RootQuery = new GraphQLObjectType({
                 userId: { type: GraphQLID },
             },
             resolve(parent, args) {
-                return AffiliationLink.find({ postedBy: args.userId });
-            }
-        },
-
-        // affiliation link's votes
-        affiliationLinkVotes: {
-            type: new GraphQLList(AffiliationVoteType),
-            args: {
-                affiliationLinkId: { type: GraphQLID },
-            },
-            resolve(parent, args) {
-                return AffiliationVote.find({ affiliationLink: args.affiliationLinkId });
+                return AffiliationLink.find({ user: args.userId });
             }
         },
     }
@@ -162,38 +124,20 @@ const Mutation = new GraphQLObjectType({
         },
 
         // add affiliation link
-        addAffiliationLink: {
+        generateAffiliationLink: {
             type: AffiliationLinkType,
             args: {
                 name: { type: GraphQLString },
                 description: { type: GraphQLString },
-                url: { type: GraphQLNonNull(GraphQLString) },
-                postedBy: { type: GraphQLNonNull(GraphQLID) },
+                userId: { type: GraphQLNonNull(GraphQLID) },
             },
             resolve(parent, args) {
                 const affiliationLink = new AffiliationLink({
                     name: args.name,
                     description: args.description,
-                    url: args.url,
-                    postedBy: args.postedBy,
+                    user: args.userId,
                 });
                 return affiliationLink.save();
-            }
-        },
-
-        // add affiliation vote
-        addAffiliationVote: {
-            type: AffiliationVoteType,
-            args: {
-                affiliationLink: { type: GraphQLNonNull(GraphQLID) },
-                user: { type: GraphQLNonNull(GraphQLID) },
-            },
-            resolve(parent, args) {
-                const affiliationVote = new AffiliationVote({
-                    affiliationLink: args.affiliationLink,
-                    user: args.user,
-                });
-                return affiliationVote.save();
             }
         },
     }

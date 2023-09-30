@@ -19,6 +19,10 @@ const UserSchema = new mongoose.Schema({
     email: {
         type: String,
     },
+    balance: {
+        type: Number,
+        default: 0,
+    },
     authentication: {
         type: AutenticationSchema,
     },

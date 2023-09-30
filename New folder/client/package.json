@@ -1,0 +1,16 @@
+{
+  "name": "client",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@types/react": "^18.2.23",
+    "graphql-tag": "^2.12.6",
+    "react-cookie": "^6.1.1"
+  }
+}

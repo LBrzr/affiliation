@@ -9,7 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@stripe/stripe-js": "^2.1.6",
     "@types/react": "^18.2.23",
-    "graphql-tag": "^2.12.6"
+    "graphql-tag": "^2.12.6",
+    "react-cookie": "^6.1.1"
   }
 }

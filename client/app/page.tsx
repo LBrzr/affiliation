@@ -7,8 +7,14 @@ const Home = () => {
       <div>
         <h1>Home</h1>
         <p>Welcome !</p>
-        <Link href="/login">login</Link>
-        <Link href="/register">register</Link>
+        <span>Go to </span>
+        <span>
+          <Link href="/login">login</Link>
+        </span>
+        <span> or </span>
+        <span>
+          <Link href="/register">register</Link>
+        </span>
       </div>
     </main>
   )

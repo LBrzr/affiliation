@@ -9,6 +9,10 @@ const AffiliationVoteSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     },
+    date: {
+        type: Date,
+        default: Date.now,
+    },
 });
 
 module.exports = mongoose.model('AffiliationVote', AffiliationVoteSchema);
