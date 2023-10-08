@@ -1,3 +1,38 @@
+# Affiliation Link Generator and Remuneration System
+
+## Project Overview
+
+The Affiliation Link Generator and Remuneration System is a web application built with Next.js for the frontend, Express for the backend, and GraphQL for efficient data management. The primary purpose of the project is to generate and handle affiliation links, allowing users to earn remuneration for referring customers. Integrated with Stripe, the system facilitates secure and seamless transactions for both referrers and customers.
+
+## Features
+
+1. **Affiliation Link Generation:**
+   - Users can generate unique affiliation links associated with their accounts.
+   - Generated links track referrals and provide remuneration for successful conversions.
+
+2. **Remuneration Handling with Stripe:**
+   - Integration with Stripe for secure payment processing.
+   - Referrers receive remuneration for each successful product purchase made through their affiliation link.
+
+3. **User Authentication:**
+   - Secure user authentication to ensure that only authorized users can generate affiliation links and access remuneration details.
+
+4. **Dashboard and Reporting:**
+   - Dashboard to track affiliation link performance and earnings.
+
+5. **GraphQL API:**
+   - Efficient data management with GraphQL, providing a flexible and powerful API for frontend-backend communication.
+
+## Technologies Used
+
+- **Next.js:** A React framework for building server-rendered and static web applications.
+
+- **Express:** A web application framework for Node.js to build the backend server.
+
+- **GraphQL:** A query language and runtime for APIs, providing a more efficient and powerful alternative to REST.
+
+- **Stripe:** A secure and reliable payment processing platform.
+
 ## Getting Started
 
 First, run the development server:
